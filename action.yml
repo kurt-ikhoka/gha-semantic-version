@@ -1,11 +1,27 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Semantic Version Update'
+description: 'Given a semantic version string it will generate a new version based on the required operation'
+author: '@ckurtm'
 inputs:
-  milliseconds: # change this
+  version-name: # change this
+    required: false
+    description: 'the version to be updated'
+  version-code: # change this
+    required: false
+    description: 'the version code to be updated'
+  version-file: # change this
+    required: false
+    description: 'the version properties file to be updated'
+  update-type: # change this
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'the version update type, PATCH, MINOR, MAJOR, BUILD'
+    default: '1.0.0'
+outputs:
+  new-version-name:
+    description: "the new version"
+    value: ${{ steps.new-version-generator.outputs.new-version-name }}
+  new-version-code:
+    description: "the new version code"
+    value: ${{ steps.new-version-generator.outputs.new-version-code }}
 runs:
   using: 'node16'
   main: 'dist/index.js'
