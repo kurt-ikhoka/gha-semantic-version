@@ -20,7 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./
+        id: version
         with:
           version-name: '3.4.0'
           version-code:  4196
           update-type: 'patch'
+      - run: |
+          echo "Version name: ${{ steps.version.outputs.version-name }}"
+          echo "Version code: ${{ steps.version.outputs.version-code }}"
