@@ -9,7 +9,7 @@ This Github action will help increment a given semantic version. It is inspired 
 ## Usage
 
 ```yaml
-uses: kurt-ikhokha/gha-semantic-version
+uses: kurt-ikhokha/gha-semantic-version@v1
 with:
   version-name: '3.4.0' #required if version-file not provided
   version-code:  4196 #required if version-file not provided
