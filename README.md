@@ -16,8 +16,17 @@ with:
   update-type: 'patch'. # major, minor, patch, build 
   version-file: 'path to version.properties file' # required if version-name and version-code are not provided
 ```
+The `version.properties` file should be in the following format:
+
+```properties
+version.name=3.4.0
+version.code=4196
+```
+
+
 Examples
 ```yaml
+       # patch version update
       - name: 'PATCH version update'
         uses: kurt-ikhokha/gha-semantic-version@v1
         id: patch
@@ -31,6 +40,7 @@ Examples
           echo "Version name: ${{ steps.patch.outputs.new-version-name }}"
           echo "Version code: ${{ steps.patch.outputs.new-version-code }}"
      
+      # minor version update
       - name: 'MINOR version update'
         uses: kurt-ikhokha/gha-semantic-version@v1
         id: minor
@@ -44,6 +54,7 @@ Examples
           echo "Version name: ${{ steps.minor.outputs.new-version-name }}"
           echo "Version code: ${{ steps.minor.outputs.new-version-code }}"
 
+      # major version update
       - name: 'MAJOR version update'
         uses: kurt-ikhokha/gha-semantic-version@v1
         id: major
@@ -56,7 +67,8 @@ Examples
           echo "Majored 1.0.0"
           echo "Version name: ${{ steps.major.outputs.new-version-name }}"
           echo "Version code: ${{ steps.major.outputs.new-version-code }}"
-          
+        
+      # regular build version   
       - name: 'BUILD version update'
         uses: kurt-ikhokha/gha-semantic-version@v1
         id: build
@@ -71,12 +83,7 @@ Examples
           echo "Version code: ${{ steps.build.outputs.new-version-code }}"
 ```
 
-The `version.properties` file should be in the following format:
 
-```properties
-version.name=3.4.0
-version.code=4196
-```
 
 ## Contribution
 
