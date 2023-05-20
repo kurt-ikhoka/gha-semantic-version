@@ -19,12 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./
+      - name: 'Version Update'
+        uses: ./
         id: version
         with:
           version-name: '3.4.0'
           version-code:  4196
           update-type: 'patch'
-      - run: |
-          echo "Version name: ${{ steps.version.outputs.version-name }}"
-          echo "Version code: ${{ steps.version.outputs.version-code }}"
+      - name: 'Get the version'
+        run: |
+          echo "Version name: ${{ steps.version.outputs.new-version-name }}"
+          echo "Version code: ${{ steps.version.outputs.new-version-code }}"
