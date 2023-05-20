@@ -1,13 +1,51 @@
 import {PreRelease} from './pre-release'
-import {Patterns} from './patterns'
 import {Inc} from './inc'
 
+const NUMERIC = '0|[1-9]\\d*'
+
+// Alphanumeric or hyphen pattern.
+const ALPHANUMERIC_OR_HYPHEN = '[0-9a-zA-Z-]'
+
+// Letter or hyphen pattern.
+const LETTER_OR_HYPHEN = '[a-zA-Z-]'
+
+// Non-numeric identifier pattern. (used for parsing pre-release)
+const NON_NUMERIC = `\\d*${LETTER_OR_HYPHEN}${ALPHANUMERIC_OR_HYPHEN}*`
+
+// Dot-separated numeric identifier pattern. (<major>.<minor>.<patch>)
+const CORE_VERSION = `(${NUMERIC})\\.(${NUMERIC})\\.(${NUMERIC})`
+
+// Dot-separated loose numeric identifier pattern. (<major>(.<minor>)?(.<patch>)?)
+const LOOSE_CORE_VERSION = `(${NUMERIC})(?:\\.(${NUMERIC}))?(?:\\.(${NUMERIC}))?`
+
+// Numeric or non-numeric pre-release part pattern.
+const PRE_RELEASE_PART = `(?:${NUMERIC}|${NON_NUMERIC})`
+
+// Pre-release identifier pattern. A hyphen followed by dot-separated
+// numeric or non-numeric pre-release parts.
+const PRE_RELEASE = `(?:-(${PRE_RELEASE_PART}(?:\\.${PRE_RELEASE_PART})*))`
+
+// Build-metadata identifier pattern. A + sign followed by dot-separated
+// alphanumeric build-metadata parts.
+const BUILD = `(?:\\+(${ALPHANUMERIC_OR_HYPHEN}+(?:\\.${ALPHANUMERIC_OR_HYPHEN}+)*))`
+
+// List of allowed operations in a condition.
+// Numeric identifier pattern for parsing conditions.
+// X-RANGE version: 1.x | 1.2.* | 1.1.X
+// Pattern that only matches numbers.
+// Pattern that only matches alphanumeric or hyphen characters.
+// Version parsing pattern: 1.2.3-alpha+build
+const VERSION_REGEX = `^${CORE_VERSION}${PRE_RELEASE}?${BUILD}?$`
+
+// Prefixed version parsing pattern: v1.2-alpha+build
+const LOOSE_VERSION_REGEX = `^v?${LOOSE_CORE_VERSION}${PRE_RELEASE}?${BUILD}?$`
+
+// Operator condition: >=1.2.*
+// Hyphen range condition: 1.2.* - 2.0.0
 export class Version {
-  private static readonly versionRegex: RegExp = new RegExp(
-    Patterns.VERSION_REGEX
-  )
+  private static readonly versionRegex: RegExp = new RegExp(VERSION_REGEX)
   private static readonly looseVersionRegex: RegExp = new RegExp(
-    Patterns.LOOSE_VERSION_REGEX
+    LOOSE_VERSION_REGEX
   )
 
   static readonly min: Version = new Version()

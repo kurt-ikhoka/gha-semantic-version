@@ -9,7 +9,7 @@ export class Properties {
     this.loadProperties()
   }
 
-  private loadProperties() {
+  private loadProperties(): void {
     const content = fs.readFileSync(this.filePath, 'utf8')
     const lines = content.split('\n')
 
