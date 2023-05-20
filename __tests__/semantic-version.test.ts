@@ -12,7 +12,10 @@ function resetFile() {
     properties.setValue('code', '0');
     properties.saveToFile();
 }
+
+
 describe('version updates without properties file', () => {
+    const version = new SemanticVersion("version","code");
 
     it('can update a versions patch number', () => {
         const version = new SemanticVersion();
@@ -22,21 +25,18 @@ describe('version updates without properties file', () => {
     })
 
     it('can update a versions minor number', () => {
-        const version = new SemanticVersion();
         const new_version = version.update('minor', '1.0.0', 0, undefined);
         expect(new_version.version_name).toEqual("1.1.0");
         expect(new_version.version_code).toEqual(1);
     })
 
     it('can update a versions major number', async () => {
-        const version = new SemanticVersion();
         const new_version = version.update('major', '1.1.0', 0, undefined);
         expect(new_version.version_name).toEqual("2.0.0");
         expect(new_version.version_code).toEqual(1);
     })
 
     it('can update a versions build', async () => {
-        const version = new SemanticVersion();
         const new_version = version.update('build', '1.0.0', 400, undefined);
         expect(new_version.version_name).toEqual("1.0.0-401");
         expect(new_version.version_code).toEqual(401);
@@ -44,9 +44,9 @@ describe('version updates without properties file', () => {
 })
 
 describe('version updates with properties file', () => {
+    const version = new SemanticVersion("version","code");
 
     it('can update a versions patch number', () => {
-        const version = new SemanticVersion();
         const new_version = version.update('patch', undefined, undefined,file_path);
         const properties = new Properties(file_path);
         expect(properties.getValue('version')).toEqual("1.0.1");
@@ -55,7 +55,6 @@ describe('version updates with properties file', () => {
     })
 
     it('can update a versions minor number', () => {
-        const version = new SemanticVersion();
         const new_version = version.update('minor', undefined, undefined,file_path);
         const properties = new Properties(file_path);
         expect(properties.getValue('version')).toEqual("1.1.0");
@@ -64,7 +63,6 @@ describe('version updates with properties file', () => {
     })
 
     it('can update a versions major number', async () => {
-        const version = new SemanticVersion();
         const new_version = version.update('major', undefined, undefined,file_path);
         const properties = new Properties(file_path);
         expect(properties.getValue('version')).toEqual("2.0.0");
@@ -73,7 +71,6 @@ describe('version updates with properties file', () => {
     })
 
     it('can update a versions build', async () => {
-        const version = new SemanticVersion();
         const new_version = version.update('build', undefined, undefined,file_path);
         const properties = new Properties(file_path);
         expect(properties.getValue('version')).toEqual("1.0.0-1");

@@ -8,6 +8,8 @@ async function run(): Promise<void> {
     const version_name: string = core.getInput('version-name')
     const version_code: string = core.getInput('version-code')
     const version_file: string = core.getInput('version-file')
+    const version_name_key: string = core.getInput('version-name-key')
+    const version_code_key: string = core.getInput('version-code-key')
     const validator = new Validator(
       update_type,
       version_name,
@@ -22,7 +24,7 @@ async function run(): Promise<void> {
     validator.checkUpdateType()
     validator.checkVersioning()
     core.debug('all credentials are valid')
-    const version = new SemanticVersion()
+    const version = new SemanticVersion(version_name_key, version_code_key)
     const result = version.update(
       update_type,
       version_name,

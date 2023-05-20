@@ -15,6 +15,8 @@ with:
   version-code:  4196 #required if version-file not provided
   update-type: 'patch'. # major, minor, patch, build 
   version-file: 'path to version.properties file' # required if version-name and version-code are not provided
+  version-code-key: 'version.code' #required if version-file is provided and is the key name for the version code in the provided properties file
+  version-name-key: 'version.name' #required if version-file is provided and is the key name for the version name in the provided properties file
 ```
 The `version.properties` file should be in the following format:
 

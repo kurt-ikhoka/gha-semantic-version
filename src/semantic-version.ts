@@ -4,6 +4,14 @@ import {Version} from './version'
 import {VersionInfo} from './version-info'
 
 export class SemanticVersion {
+  readonly version_name_key: string
+  readonly version_code_key: string
+
+  constructor(version_name_key?: string, version_code_key?: string) {
+    this.version_code_key = version_code_key ?? 'version_code'
+    this.version_name_key = version_name_key ?? 'version_name'
+  }
+
   update(
     updateType: string,
     version_name?: string,
@@ -17,8 +25,8 @@ export class SemanticVersion {
     // check if file exists if exists then read it and parse version and version code
     if (filePath !== undefined && this.fileExists(filePath)) {
       const properties = new Properties(filePath)
-      const name = properties.getValue('version')
-      const code = properties.getValue('code')
+      const name = properties.getValue(this.version_name_key)
+      const code = properties.getValue(this.version_code_key)
       if (!code || !this.isNumber(code)) {
         throw new Error('invalid version code')
       }
@@ -41,8 +49,11 @@ export class SemanticVersion {
     const versionInfo = this.generateVersion(updateType, old_name, old_code)
     if (filePath != null && this.fileExists(filePath)) {
       const properties = new Properties(filePath)
-      properties.setValue('version', versionInfo.version_name)
-      properties.setValue('code', versionInfo.version_code.toString())
+      properties.setValue(this.version_name_key, versionInfo.version_name)
+      properties.setValue(
+        this.version_code_key,
+        versionInfo.version_code.toString()
+      )
       properties.saveToFile()
     }
     return versionInfo
