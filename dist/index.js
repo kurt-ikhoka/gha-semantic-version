@@ -1,6 +1,54 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 414:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionInfo = void 0;
+class VersionInfo {
+    constructor(version_name, version_code) {
+        this.version_name = version_name;
+        this.version_code = version_code;
+    }
+}
+exports.VersionInfo = VersionInfo;
+
+
+/***/ }),
+
+/***/ 789:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Inc = void 0;
+var Inc;
+(function (Inc) {
+    /**
+     * Indicates that the Version should be incremented by its MAJOR number.
+     */
+    Inc["MAJOR"] = "MAJOR";
+    /**
+     * Indicates that the Version should be incremented by its MINOR number.
+     */
+    Inc["MINOR"] = "MINOR";
+    /**
+     * Indicates that the Version should be incremented by its PATCH number.
+     */
+    Inc["PATCH"] = "PATCH";
+    /**
+     * Indicates that the Version should be incremented by its PRE-RELEASE identifier.
+     */
+    Inc["PRE_RELEASE"] = "PRE_RELEASE";
+})(Inc = exports.Inc || (exports.Inc = {}));
+
+
+/***/ }),
+
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -40,20 +88,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
+const validator_1 = __nccwpck_require__(618);
+const semantic_version_1 = __nccwpck_require__(100);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ms = core.getInput('milliseconds');
-            core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-            core.debug(new Date().toTimeString());
-            yield (0, wait_1.wait)(parseInt(ms, 10));
-            core.debug(new Date().toTimeString());
-            core.setOutput('time', new Date().toTimeString());
+            const update_type = core.getInput('update-type');
+            const version_name = core.getInput('version-name');
+            const version_code = core.getInput('version-code');
+            const version_file = core.getInput('version-file');
+            const validator = new validator_1.Validator(update_type, version_name, version_code, version_file);
+            core.debug(`update_type: ${update_type}`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+            core.debug(`version_name: ${version_name}`);
+            core.debug(`version_code: ${version_code}`);
+            core.debug(`version_file: ${version_file}`);
+            validator.checkUpdateType();
+            validator.checkVersioning();
+            core.debug('all credentials are valid');
+            const version = new semantic_version_1.SemanticVersion();
+            const result = version.update(update_type, version_name, parseInt(version_code), version_file);
+            core.setOutput('new-version-name', result.version_name);
+            core.setOutput('new-version-code', result.version_code);
+            core.setOutput('success', 'true');
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+            if (error instanceof Error) {
+                core.error(error.message);
+            }
+            // eslint-disable-next-line no-console
+            console.log(error);
+            core.setFailed('failed to publish app');
         }
     });
 }
@@ -62,33 +126,500 @@ run();
 
 /***/ }),
 
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ 996:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Patterns = void 0;
+class Patterns {
+}
+// Numeric identifier pattern. (used for parsing major, minor, and patch)
+Patterns.NUMERIC = '0|[1-9]\\d*';
+// Alphanumeric or hyphen pattern.
+Patterns.ALPHANUMERIC_OR_HYPHEN = '[0-9a-zA-Z-]';
+// Letter or hyphen pattern.
+Patterns.LETTER_OR_HYPHEN = '[a-zA-Z-]';
+// Non-numeric identifier pattern. (used for parsing pre-release)
+Patterns.NON_NUMERIC = `\\d*${Patterns.LETTER_OR_HYPHEN}${Patterns.ALPHANUMERIC_OR_HYPHEN}*`;
+// Dot-separated numeric identifier pattern. (<major>.<minor>.<patch>)
+Patterns.CORE_VERSION = `(${Patterns.NUMERIC})\\.(${Patterns.NUMERIC})\\.(${Patterns.NUMERIC})`;
+// Dot-separated loose numeric identifier pattern. (<major>(.<minor>)?(.<patch>)?)
+Patterns.LOOSE_CORE_VERSION = `(${Patterns.NUMERIC})(?:\\.(${Patterns.NUMERIC}))?(?:\\.(${Patterns.NUMERIC}))?`;
+// Numeric or non-numeric pre-release part pattern.
+Patterns.PRE_RELEASE_PART = `(?:${Patterns.NUMERIC}|${Patterns.NON_NUMERIC})`;
+// Pre-release identifier pattern. A hyphen followed by dot-separated
+// numeric or non-numeric pre-release parts.
+Patterns.PRE_RELEASE = `(?:-(${Patterns.PRE_RELEASE_PART}(?:\\.${Patterns.PRE_RELEASE_PART})*))`;
+// Build-metadata identifier pattern. A + sign followed by dot-separated
+// alphanumeric build-metadata parts.
+Patterns.BUILD = `(?:\\+(${Patterns.ALPHANUMERIC_OR_HYPHEN}+(?:\\.${Patterns.ALPHANUMERIC_OR_HYPHEN}+)*))`;
+// List of allowed operations in a condition.
+Patterns.ALLOWED_OPERATORS = '||=|!=|<|<=|=<|>|>=|=>|\\^|~>|~';
+// Numeric identifier pattern for parsing conditions.
+Patterns.X_RANGE_NUMERIC = `${Patterns.NUMERIC}|x|X|\\*`;
+// X-RANGE version: 1.x | 1.2.* | 1.1.X
+Patterns.X_RANGE_VERSION = `(${Patterns.X_RANGE_NUMERIC})(?:\\.(${Patterns.X_RANGE_NUMERIC})(?:\\.(${Patterns.X_RANGE_NUMERIC})(?:${Patterns.PRE_RELEASE})?${Patterns.BUILD}?)?)?`;
+// Pattern that only matches numbers.
+Patterns.ONLY_NUMBER_REGEX = '^[0-9]+$';
+// Pattern that only matches alphanumeric or hyphen characters.
+Patterns.ONLY_ALPHANUMERIC_OR_HYPHEN_REGEX = `^${Patterns.ALPHANUMERIC_OR_HYPHEN}+$`;
+// Version parsing pattern: 1.2.3-alpha+build
+Patterns.VERSION_REGEX = `^${Patterns.CORE_VERSION}${Patterns.PRE_RELEASE}?${Patterns.BUILD}?$`;
+// Prefixed version parsing pattern: v1.2-alpha+build
+Patterns.LOOSE_VERSION_REGEX = `^v?${Patterns.LOOSE_CORE_VERSION}${Patterns.PRE_RELEASE}?${Patterns.BUILD}?$`;
+// Operator condition: >=1.2.*
+Patterns.OPERATOR_CONDITION_REGEX = `(${Patterns.ALLOWED_OPERATORS})\\s*v?(?:${Patterns.X_RANGE_VERSION})`;
+// Hyphen range condition: 1.2.* - 2.0.0
+Patterns.HYPHEN_CONDITION_REGEX = `\\s*v?(?:${Patterns.X_RANGE_VERSION})\\s+-\\s+v?(?:${Patterns.X_RANGE_VERSION})\\s*`;
+exports.Patterns = Patterns;
+
+
+/***/ }),
+
+/***/ 197:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PreRelease = void 0;
+class PreRelease {
+    constructor(parts) {
+        this.parts = parts;
+    }
+    static create(preReleaseString) {
+        return new PreRelease(this.validate(preReleaseString));
+    }
+    get identity() {
+        return this.parts[0];
+    }
+    increment() {
+        const newParts = [...this.parts];
+        const lastNumericItem = newParts
+            .slice()
+            .reverse()
+            .find(item => !isNaN(parseInt(item)));
+        if (lastNumericItem !== undefined) {
+            const lastNumericIndex = newParts.lastIndexOf(lastNumericItem);
+            newParts[lastNumericIndex] = (parseInt(lastNumericItem) + 1).toString();
+        }
+        else {
+            newParts.push(PreRelease.DEFAULT_INIT_PART);
+        }
+        return new PreRelease(newParts);
+    }
+    compare(other) {
+        const thisSize = this.parts.length;
+        const otherSize = other.parts.length;
+        const count = Math.min(thisSize, otherSize);
+        for (let i = 0; i < count; i++) {
+            const partResult = this.compareParts(this.parts[i], other.parts[i]);
+            if (partResult !== 0)
+                return partResult;
+        }
+        return thisSize - otherSize;
+    }
+    equals(other) {
+        return other !== null && this.compare(other) === 0;
+    }
+    toString() {
+        return this.parts.join('.');
+    }
+    compareParts(part1, part2) {
+        const firstPart = parseInt(part1);
+        const secondPart = parseInt(part2);
+        if (!isNaN(firstPart) && isNaN(secondPart)) {
+            return -1;
+        }
+        else if (isNaN(firstPart) && !isNaN(secondPart)) {
+            return 1;
+        }
+        else if (!isNaN(firstPart) && !isNaN(secondPart)) {
+            return firstPart - secondPart;
+        }
+        else {
+            return part1.localeCompare(part2);
+        }
+    }
+    static validate(preReleaseString) {
+        if (preReleaseString.trim() === '') {
+            return [this.DEFAULT_INIT_PART];
+        }
+        const parts = preReleaseString.trim().split('.');
+        for (const part of parts) {
+            let error = null;
+            if (part === '') {
+                error = 'Pre-release identity contains an empty part.';
+            }
+            else if (this.onlyNumberRegex.test(part) &&
+                part.length > 1 &&
+                part.startsWith('0')) {
+                error = `Pre-release part '${part}' is numeric but contains a leading zero.`;
+            }
+            else if (!this.onlyAlphaNumericAndHyphenRegex.test(part)) {
+                error = `Pre-release part '${part}' contains an invalid character.`;
+            }
+            if (error) {
+                throw new Error(`${error} (${preReleaseString})`);
+            }
+        }
+        return parts;
+    }
+}
+PreRelease.DEFAULT_INIT_PART = '0';
+PreRelease.onlyNumberRegex = new RegExp('^[0-9]+$');
+PreRelease.onlyAlphaNumericAndHyphenRegex = new RegExp('^[0-9A-Za-z-]+$');
+PreRelease.default = new PreRelease([
+    PreRelease.DEFAULT_INIT_PART
+]);
+exports.PreRelease = PreRelease;
+
+
+/***/ }),
+
+/***/ 333:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
+exports.Properties = void 0;
+const fs = __importStar(__nccwpck_require__(147));
+class Properties {
+    constructor(filePath) {
+        this.properties = {};
+        this.filePath = filePath;
+        this.loadProperties();
+    }
+    loadProperties() {
+        const content = fs.readFileSync(this.filePath, 'utf8');
+        const lines = content.split('\n');
+        for (const line of lines) {
+            if (line.trim() !== '' && !line.startsWith('#')) {
+                const [key, value] = line.split('=');
+                this.properties[key.trim()] = value.trim();
             }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
+        }
+    }
+    getValue(key) {
+        return this.properties[key];
+    }
+    setValue(key, value) {
+        this.properties[key] = value;
+    }
+    saveToFile() {
+        let content = '';
+        for (const key in this.properties) {
+            const value = this.properties[key];
+            content += `${key}=${value}\n`;
+        }
+        fs.writeFileSync(this.filePath, content, 'utf8');
+    }
 }
-exports.wait = wait;
+exports.Properties = Properties;
+
+
+/***/ }),
+
+/***/ 100:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SemanticVersion = void 0;
+const properties_1 = __nccwpck_require__(333);
+const fs_1 = __importDefault(__nccwpck_require__(147));
+const version_1 = __nccwpck_require__(217);
+const VersionInfo_1 = __nccwpck_require__(414);
+class SemanticVersion {
+    update(updateType, version_name, version_code, filePath) {
+        let old_name = version_name ? version_name : '';
+        let old_code = isNaN(version_code !== null && version_code !== void 0 ? version_code : NaN)
+            ? -1
+            : version_code;
+        // check if file exists if exists then read it and parse version and version code
+        if (filePath !== undefined && this.fileExists(filePath)) {
+            const properties = new properties_1.Properties(filePath);
+            const name = properties.getValue('version');
+            const code = properties.getValue('code');
+            if (!code || !this.isNumber(code)) {
+                throw new Error('invalid version code');
+            }
+            if (!name) {
+                throw new Error('invalid version');
+            }
+            old_code = parseInt(code);
+            old_name = name;
+        }
+        else {
+            //else  read version and version code
+            if (isNaN(old_code)) {
+                throw new Error('invalid version code');
+            }
+            if (!version_name) {
+                throw new Error('invalid version');
+            }
+        }
+        // generate new version and version code
+        const versionInfo = this.generateVersion(updateType, old_name, old_code);
+        if (filePath != null && this.fileExists(filePath)) {
+            const properties = new properties_1.Properties(filePath);
+            properties.setValue('version', versionInfo.version_name);
+            properties.setValue('code', versionInfo.version_code.toString());
+            properties.saveToFile();
+        }
+        return versionInfo;
+    }
+    generateVersion(update_type, name, code) {
+        const old_version = version_1.Version.parse(name);
+        let new_version;
+        let new_code = code;
+        new_code = new_code + 1;
+        if (update_type === 'major') {
+            new_version = old_version.nextMajor();
+        }
+        else if (update_type === 'minor') {
+            new_version = old_version.nextMinor();
+        }
+        else if (update_type === 'patch') {
+            new_version = old_version.nextPatch();
+        }
+        else if (update_type === 'build') {
+            // const preRelease = format(new Date(), 'ddMMMHHmm').toUpperCase();
+            new_version = old_version.copy(old_version.major, old_version.minor, old_version.patch, `${new_code}`);
+        }
+        else {
+            throw new Error('invalid update type');
+        }
+        return new VersionInfo_1.VersionInfo(new_version.toString(), new_code);
+    }
+    fileExists(filePath) {
+        return fs_1.default.existsSync(filePath);
+    }
+    isNumber(value) {
+        // Use parseFloat to parse the value as a number, and then use isNaN to check if the parsed value is NaN
+        return !isNaN(parseFloat(value));
+    }
+}
+exports.SemanticVersion = SemanticVersion;
+
+
+/***/ }),
+
+/***/ 618:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Validator = void 0;
+const fs_1 = __importDefault(__nccwpck_require__(147));
+class Validator {
+    constructor(update_type, version_name, version_code, file_path) {
+        this.update_type = update_type;
+        this.version_name = version_name !== undefined ? version_name : '';
+        this.version_code = version_code !== undefined ? version_code : '';
+        this.file_path = file_path !== undefined ? file_path : '';
+    }
+    checkUpdateType() {
+        if (this.update_type === '') {
+            throw Error('update_type is required');
+        }
+        if (this.update_type !== 'major' &&
+            this.update_type !== 'minor' &&
+            this.update_type !== 'patch' &&
+            this.update_type !== 'build') {
+            throw Error('update_type must be set to  major, minor, patch or build');
+        }
+    }
+    checkVersioning() {
+        if (this.version_name === '' && this.file_path === '') {
+            throw Error('version_name is required if file_path is not provided');
+        }
+        if ((this.version_code === '' || !this.isNumber(this.version_code)) &&
+            this.file_path === '') {
+            throw Error('version_code is required if file_path is not provided');
+        }
+    }
+    fileExists(filePath) {
+        return fs_1.default.existsSync(filePath);
+    }
+    isNumber(value) {
+        // Use parseFloat to parse the value as a number, and then use isNaN to check if the parsed value is NaN
+        return !isNaN(parseFloat(value));
+    }
+}
+exports.Validator = Validator;
+
+
+/***/ }),
+
+/***/ 217:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Version = void 0;
+const pre_release_1 = __nccwpck_require__(197);
+const patterns_1 = __nccwpck_require__(996);
+const inc_1 = __nccwpck_require__(789);
+class Version {
+    constructor(major = 0, minor = 0, patch = 0, parsedPreRelease, buildMetadata) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.parsedPreRelease = parsedPreRelease;
+        this.buildMetadata = buildMetadata;
+        if (major < 0)
+            throw new Error('The major number must be >= 0.');
+        if (minor < 0)
+            throw new Error('The minor number must be >= 0.');
+        if (patch < 0)
+            throw new Error('The patch number must be >= 0.');
+    }
+    static create(major = 0, minor = 0, patch = 0, preRelease, buildMetadata) {
+        return new Version(major, minor, patch, preRelease ? pre_release_1.PreRelease.create(preRelease) : undefined, buildMetadata);
+    }
+    get preRelease() {
+        var _a;
+        return (_a = this.parsedPreRelease) === null || _a === void 0 ? void 0 : _a.toString();
+    }
+    get isPreRelease() {
+        return this.parsedPreRelease !== undefined;
+    }
+    get isStable() {
+        return this.major > 0 && this.parsedPreRelease === undefined;
+    }
+    copy(major = this.major, minor = this.minor, patch = this.patch, preRelease = this.preRelease, buildMetadata = this.buildMetadata) {
+        return Version.create(major, minor, patch, preRelease, buildMetadata);
+    }
+    compareTo(other) {
+        if (this.major !== other.major) {
+            return this.major - other.major;
+        }
+        else if (this.minor !== other.minor) {
+            return this.minor - other.minor;
+        }
+        else if (this.patch !== other.patch) {
+            return this.patch - other.patch;
+        }
+        else if (this.parsedPreRelease && !other.parsedPreRelease) {
+            return -1;
+        }
+        else if (!this.parsedPreRelease && other.parsedPreRelease) {
+            return 1;
+        }
+        else if (this.parsedPreRelease && other.parsedPreRelease) {
+            return this.parsedPreRelease.compare(other.parsedPreRelease);
+        }
+        else {
+            return 0;
+        }
+    }
+    nextMajor(preRelease) {
+        const pr = preRelease ? pre_release_1.PreRelease.create(preRelease) : undefined;
+        return new Version(this.major + 1, 0, 0, pr);
+    }
+    nextMinor(preRelease) {
+        const pr = preRelease ? pre_release_1.PreRelease.create(preRelease) : undefined;
+        return new Version(this.major, this.minor + 1, 0, pr);
+    }
+    nextPatch(preRelease) {
+        const patchIncrement = this.preRelease == null || preRelease != null
+            ? this.patch + 1
+            : this.patch;
+        const pr = preRelease ? pre_release_1.PreRelease.create(preRelease) : undefined;
+        return new Version(this.major, this.minor, patchIncrement, pr);
+    }
+    nextPreRelease(preRelease) {
+        const patchNumber = this.preRelease != null ? this.patch : this.patch + 1;
+        const preReleaseIdentity = preRelease || this.incrementPreRelease();
+        const pr = preReleaseIdentity
+            ? pre_release_1.PreRelease.create(preReleaseIdentity)
+            : undefined;
+        return new Version(this.major, this.minor, patchNumber, pr);
+    }
+    // This is just an example, you need to implement this according to your requirements.
+    incrementPreRelease() {
+        return `${this.preRelease}.1`;
+    }
+    // Assumption: Inc is an object with MAJOR, MINOR, PATCH, PRE_RELEASE as properties.
+    inc(by, preRelease) {
+        switch (by) {
+            case inc_1.Inc.MAJOR:
+                return this.nextMajor(preRelease);
+            case inc_1.Inc.MINOR:
+                return this.nextMinor(preRelease);
+            case inc_1.Inc.PATCH:
+                return this.nextPatch(preRelease);
+            case inc_1.Inc.PRE_RELEASE:
+                return this.nextPreRelease(preRelease);
+            default:
+                return this; // return current version as default
+        }
+    }
+    withoutSuffixes() {
+        return new Version(this.major, this.minor, this.patch);
+    }
+    equals(other) {
+        return this.compareTo(other) === 0;
+    }
+    toString() {
+        return `${this.major}.${this.minor}.${this.patch}${this.parsedPreRelease ? `-${this.parsedPreRelease}` : ''}${this.buildMetadata ? `+${this.buildMetadata}` : ''}`;
+    }
+    static parse(versionString, strict = true) {
+        const regex = strict ? this.versionRegex : this.looseVersionRegex;
+        const result = regex.exec(versionString);
+        if (!result)
+            throw new Error(`Invalid version: ${versionString}`);
+        const major = parseInt(result[1]) || 0;
+        const minor = parseInt(result[2]) || 0;
+        const patch = parseInt(result[3]) || 0;
+        const preRelease = result[4];
+        const buildMetadata = result[5];
+        if (!strict && isNaN(major)) {
+            throw new Error(`Invalid version: ${versionString}`);
+        }
+        return Version.create(major, minor, patch, preRelease, buildMetadata);
+    }
+}
+Version.versionRegex = new RegExp(patterns_1.Patterns.VERSION_REGEX);
+Version.looseVersionRegex = new RegExp(patterns_1.Patterns.LOOSE_VERSION_REGEX);
+Version.min = new Version();
+exports.Version = Version;
 
 
 /***/ }),
