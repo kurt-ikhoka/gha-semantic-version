@@ -1,7 +1,7 @@
 import {Properties} from './properties'
 import fs from 'fs'
 import {Version} from './version'
-import {VersionInfo} from './VersionInfo'
+import {VersionInfo} from './version-info'
 
 export class SemanticVersion {
   update(

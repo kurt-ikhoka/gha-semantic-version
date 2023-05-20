@@ -2,7 +2,7 @@
   <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
 </p>
 
-# Github Action For Semantic Versioning 2.0.0
+# Github Action for Semantic Versioning 2.0.0 updates
 
 This Github action will help increment a given semantic version. It is inspired by the [kotlin-semver](https://github.com/z4kn4fein/kotlin-semver) implementation. 
 
@@ -15,15 +15,15 @@ with:
   version-code:  4196 #required if version-file not provided
   update-type: 'patch'. # major, minor, patch, build 
   version-file: 'path to version.properties file' # required if version-name and version-code are not provided
-  
 ```
 
-`version.properties` file should be in the following format:
+The `version.properties` file should be in the following format:
 
-```properties   
+```properties
 version.name=3.4.0
 version.code=4196
 ```
+
 ## Contribution
 
 > First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
@@ -48,8 +48,8 @@ $ npm test
  PASS  __tests__/semantic-version.test.ts
   version updates without properties file
   ✓ can update a versions patch number (1 ms)
-  ✓ can update a versions minor number
-  ✓ can update a versions major number
-  ✓ can update a versions build
+  ✓ can update versions minor number
+  ✓ can update versions major number
+  ✓ can update a version build
 ...
 ```
