@@ -5,6 +5,9 @@ inputs:
   version-name:
     required: false
     description: 'the version to be updated'
+  version-name-postfix:
+    required: false
+    description: 'the version name postfix'
   version-code:
     required: false
     description: 'the version code to be updated'
@@ -21,6 +24,7 @@ inputs:
     required: true
     description: 'the version update type, PATCH, MINOR, MAJOR, BUILD'
     default: '1.0.0'
+
 outputs:
   new-version-name:
     description: "the new version"

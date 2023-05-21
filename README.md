@@ -12,9 +12,10 @@ This Github action will help increment a given semantic version. It is inspired 
 uses: kurt-ikhokha/gha-semantic-version@v1
 with:
   version-name: '3.4.0' #required if version-file not provided
+  version-name-postfix: 'alpha' #optional postfix to append to the version name
   version-code:  4196 #required if version-file not provided
   update-type: 'patch'. # major, minor, patch, build 
-  version-file: 'path to version.properties file' # required if version-name and version-code are not provided
+  version-file: '<path/to/version.properties file>' # required if version-name and version-code are not provided
   version-code-key: 'version.code' #required if version-file is provided and is the key name for the version code in the provided properties file
   version-name-key: 'version.name' #required if version-file is provided and is the key name for the version name in the provided properties file
 ```

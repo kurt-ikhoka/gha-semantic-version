@@ -15,6 +15,7 @@ export class SemanticVersion {
   update(
     updateType: string,
     version_name?: string,
+    version_name_postfix?: string,
     version_code?: number,
     filePath?: string
   ): VersionInfo {
@@ -46,7 +47,12 @@ export class SemanticVersion {
     }
 
     // generate new version and version code
-    const versionInfo = this.generateVersion(updateType, old_name, old_code)
+    const versionInfo = this.generateVersion(
+      updateType,
+      old_name,
+      old_code,
+      version_name_postfix
+    )
     if (filePath != null && this.fileExists(filePath)) {
       const properties = new Properties(filePath)
       properties.setValue(this.version_name_key, versionInfo.version_name)
@@ -62,7 +68,8 @@ export class SemanticVersion {
   private generateVersion(
     update_type: string,
     name: string,
-    code: number
+    code: number,
+    postfix?: string
   ): VersionInfo {
     const old_version = Version.parse(name)
     let new_version: Version
@@ -75,12 +82,12 @@ export class SemanticVersion {
     } else if (update_type === 'patch') {
       new_version = old_version.nextPatch()
     } else if (update_type === 'build') {
-      // const preRelease = format(new Date(), 'ddMMMHHmm').toUpperCase();
+      const preRelease = postfix ? `${postfix}${new_code}` : new_code.toString()
       new_version = old_version.copy(
         old_version.major,
         old_version.minor,
         old_version.patch,
-        `${new_code}`
+        preRelease
       )
     } else {
       throw new Error('invalid update type')
