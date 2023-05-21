@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-
+import * as core from '@actions/core'
 export class Properties {
   private filePath: string
   private properties: {[key: string]: string} = {}
@@ -16,7 +16,7 @@ export class Properties {
     for (const line of lines) {
       if (line.trim() !== '' && !line.startsWith('#')) {
         const [key, value] = line.split('=')
-        console.log(`${key} -> ${value}`)
+        core.debug('${key} -> ${value}')
         this.properties[key.trim()] = value.trim()
       }
     }
