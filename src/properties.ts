@@ -16,6 +16,7 @@ export class Properties {
     for (const line of lines) {
       if (line.trim() !== '' && !line.startsWith('#')) {
         const [key, value] = line.split('=')
+        console.log(`${key} -> ${value}`)
         this.properties[key.trim()] = value.trim()
       }
     }
