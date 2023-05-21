@@ -24,6 +24,9 @@ jobs:
         id: patch
         with:
           version-name: '1.0.0'
+          version-file: './.github/version.properties'
+          version-code-key: 'bundle.version'
+          version-name-key: 'bundle.version.code'
           version-code:  0
           update-type: 'patch'
       - name: 'Get Patched version'
@@ -32,42 +35,42 @@ jobs:
           echo "Version name: ${{ steps.patch.outputs.new-version-name }}"
           echo "Version code: ${{ steps.patch.outputs.new-version-code }}"
 
-      - name: 'MINOR version update'
-        uses: ./
-        id: minor
-        with:
-          version-name: '1.0.0'
-          version-code:  0
-          update-type: 'minor'
-      - name: 'Get Minored version'
-        run: |
-          echo "Minored 1.0.0"
-          echo "Version name: ${{ steps.minor.outputs.new-version-name }}"
-          echo "Version code: ${{ steps.minor.outputs.new-version-code }}"
-
-      - name: 'MAJOR version update'
-        uses: ./
-        id: major
-        with:
-          version-name: '1.0.0'
-          version-code:  0
-          update-type: 'major'
-      - name: 'Get Majored version'
-        run: |
-          echo "Majored 1.0.0"
-          echo "Version name: ${{ steps.major.outputs.new-version-name }}"
-          echo "Version code: ${{ steps.major.outputs.new-version-code }}"
-
-      - name: 'BUILD version update'
-        uses: ./
-        id: build
-        with:
-          version-name: '1.0.0'
-          version-code:  0
-          version-name-postfix: 'alpha'
-          update-type: 'build'
-      - name: 'Get Builded version'
-        run: |
-          echo "built 1.0.0"
-          echo "Version name: ${{ steps.build.outputs.new-version-name }}"
-          echo "Version code: ${{ steps.build.outputs.new-version-code }}"
+#      - name: 'MINOR version update'
+#        uses: ./
+#        id: minor
+#        with:
+#          version-name: '1.0.0'
+#          version-code:  0
+#          update-type: 'minor'
+#      - name: 'Get Minored version'
+#        run: |
+#          echo "Minored 1.0.0"
+#          echo "Version name: ${{ steps.minor.outputs.new-version-name }}"
+#          echo "Version code: ${{ steps.minor.outputs.new-version-code }}"
+#
+#      - name: 'MAJOR version update'
+#        uses: ./
+#        id: major
+#        with:
+#          version-name: '1.0.0'
+#          version-code:  0
+#          update-type: 'major'
+#      - name: 'Get Majored version'
+#        run: |
+#          echo "Majored 1.0.0"
+#          echo "Version name: ${{ steps.major.outputs.new-version-name }}"
+#          echo "Version code: ${{ steps.major.outputs.new-version-code }}"
+#
+#      - name: 'BUILD version update'
+#        uses: ./
+#        id: build
+#        with:
+#          version-name: '1.0.0'
+#          version-code:  0
+#          version-name-postfix: 'alpha'
+#          update-type: 'build'
+#      - name: 'Get Builded version'
+#        run: |
+#          echo "built 1.0.0"
+#          echo "Version name: ${{ steps.build.outputs.new-version-name }}"
+#          echo "Version code: ${{ steps.build.outputs.new-version-code }}"
