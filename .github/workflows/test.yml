@@ -29,8 +29,8 @@ jobs:
         with:
           version-name: '1.0.0'
           version-file: './.github/version.properties'
-          version-code-key: 'bundle.version'
-          version-name-key: 'bundle.version.code'
+          version-code-key: 'bundle.version.code'
+          version-name-key: 'bundle.version.name'
           version-code:  0
           update-type: 'build'
       - name: 'Get Patched version'
