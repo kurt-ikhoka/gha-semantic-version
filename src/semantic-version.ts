@@ -2,6 +2,7 @@ import {Properties} from './properties'
 import fs from 'fs'
 import {Version} from './version'
 import {VersionInfo} from './version-info'
+import * as core from '@actions/core'
 
 export class SemanticVersion {
   readonly version_name_key: string
@@ -19,6 +20,9 @@ export class SemanticVersion {
     version_code?: number,
     filePath?: string
   ): VersionInfo {
+    core.debug(
+      'update()  type:${updateType} name:${version_name}  code:${version_code}  file:${filePath}'
+    )
     let old_name: string = version_name ? version_name : ''
     let old_code: number = isNaN(version_code ?? NaN)
       ? -1
@@ -28,8 +32,9 @@ export class SemanticVersion {
       const properties = new Properties(filePath)
       const name = properties.getValue(this.version_name_key)
       const code = properties.getValue(this.version_code_key)
-      console.log('name', name)
-      console.log('code', code)
+      core.debug('name  ${name}')
+      core.debug('code  ${code}')
+
       if (!code || !this.isNumber(code)) {
         throw new Error('invalid version code')
       }
