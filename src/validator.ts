@@ -45,6 +45,12 @@ export class Validator {
     }
   }
 
+  checkFilePath(): void {
+    if (this.file_path !== '' && !this.fileExists(this.file_path)) {
+      throw Error(`file_path ${this.file_path} does not exist`)
+    }
+  }
+
   private fileExists(filePath: string): boolean {
     return fs.existsSync(filePath)
   }

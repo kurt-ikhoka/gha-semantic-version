@@ -27,6 +27,7 @@ async function run(): Promise<void> {
     core.debug(`version_code_key: ${version_code_key}`)
     validator.checkUpdateType()
     validator.checkVersioning()
+    validator.checkFilePath()
     core.debug('all credentials are valid')
     const version = new SemanticVersion(version_name_key, version_code_key)
     const result = version.update(
