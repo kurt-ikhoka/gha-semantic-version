@@ -1,24 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 414:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.VersionInfo = void 0;
-class VersionInfo {
-    constructor(version_name, version_code) {
-        this.version_name = version_name;
-        this.version_code = version_code;
-    }
-}
-exports.VersionInfo = VersionInfo;
-
-
-/***/ }),
-
 /***/ 789:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -26,6 +8,7 @@ exports.VersionInfo = VersionInfo;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Inc = void 0;
+// eslint-disable-next-line no-shadow
 var Inc;
 (function (Inc) {
     /**
@@ -95,18 +78,25 @@ function run() {
         try {
             const update_type = core.getInput('update-type');
             const version_name = core.getInput('version-name');
+            const version_name_postfix = core.getInput('version-name-postfix');
             const version_code = core.getInput('version-code');
             const version_file = core.getInput('version-file');
+            const version_name_key = core.getInput('version-name-key');
+            const version_code_key = core.getInput('version-code-key');
             const validator = new validator_1.Validator(update_type, version_name, version_code, version_file);
             core.debug(`update_type: ${update_type}`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             core.debug(`version_name: ${version_name}`);
             core.debug(`version_code: ${version_code}`);
             core.debug(`version_file: ${version_file}`);
+            core.debug(`version_postfix: ${version_name_postfix}`);
+            core.debug(`version_name_key: ${version_name_key}`);
+            core.debug(`version_code_key: ${version_code_key}`);
             validator.checkUpdateType();
             validator.checkVersioning();
-            core.debug('all credentials are valid');
-            const version = new semantic_version_1.SemanticVersion();
-            const result = version.update(update_type, version_name, parseInt(version_code), version_file);
+            validator.checkFilePath();
+            core.debug('all parameters are valid');
+            const version = new semantic_version_1.SemanticVersion(version_name_key, version_code_key);
+            const result = version.update(update_type, version_name, version_name_postfix, parseInt(version_code), version_file);
             core.setOutput('new-version-name', result.version_name);
             core.setOutput('new-version-code', result.version_code);
             core.setOutput('success', 'true');
@@ -122,58 +112,6 @@ function run() {
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 996:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Patterns = void 0;
-class Patterns {
-}
-// Numeric identifier pattern. (used for parsing major, minor, and patch)
-Patterns.NUMERIC = '0|[1-9]\\d*';
-// Alphanumeric or hyphen pattern.
-Patterns.ALPHANUMERIC_OR_HYPHEN = '[0-9a-zA-Z-]';
-// Letter or hyphen pattern.
-Patterns.LETTER_OR_HYPHEN = '[a-zA-Z-]';
-// Non-numeric identifier pattern. (used for parsing pre-release)
-Patterns.NON_NUMERIC = `\\d*${Patterns.LETTER_OR_HYPHEN}${Patterns.ALPHANUMERIC_OR_HYPHEN}*`;
-// Dot-separated numeric identifier pattern. (<major>.<minor>.<patch>)
-Patterns.CORE_VERSION = `(${Patterns.NUMERIC})\\.(${Patterns.NUMERIC})\\.(${Patterns.NUMERIC})`;
-// Dot-separated loose numeric identifier pattern. (<major>(.<minor>)?(.<patch>)?)
-Patterns.LOOSE_CORE_VERSION = `(${Patterns.NUMERIC})(?:\\.(${Patterns.NUMERIC}))?(?:\\.(${Patterns.NUMERIC}))?`;
-// Numeric or non-numeric pre-release part pattern.
-Patterns.PRE_RELEASE_PART = `(?:${Patterns.NUMERIC}|${Patterns.NON_NUMERIC})`;
-// Pre-release identifier pattern. A hyphen followed by dot-separated
-// numeric or non-numeric pre-release parts.
-Patterns.PRE_RELEASE = `(?:-(${Patterns.PRE_RELEASE_PART}(?:\\.${Patterns.PRE_RELEASE_PART})*))`;
-// Build-metadata identifier pattern. A + sign followed by dot-separated
-// alphanumeric build-metadata parts.
-Patterns.BUILD = `(?:\\+(${Patterns.ALPHANUMERIC_OR_HYPHEN}+(?:\\.${Patterns.ALPHANUMERIC_OR_HYPHEN}+)*))`;
-// List of allowed operations in a condition.
-Patterns.ALLOWED_OPERATORS = '||=|!=|<|<=|=<|>|>=|=>|\\^|~>|~';
-// Numeric identifier pattern for parsing conditions.
-Patterns.X_RANGE_NUMERIC = `${Patterns.NUMERIC}|x|X|\\*`;
-// X-RANGE version: 1.x | 1.2.* | 1.1.X
-Patterns.X_RANGE_VERSION = `(${Patterns.X_RANGE_NUMERIC})(?:\\.(${Patterns.X_RANGE_NUMERIC})(?:\\.(${Patterns.X_RANGE_NUMERIC})(?:${Patterns.PRE_RELEASE})?${Patterns.BUILD}?)?)?`;
-// Pattern that only matches numbers.
-Patterns.ONLY_NUMBER_REGEX = '^[0-9]+$';
-// Pattern that only matches alphanumeric or hyphen characters.
-Patterns.ONLY_ALPHANUMERIC_OR_HYPHEN_REGEX = `^${Patterns.ALPHANUMERIC_OR_HYPHEN}+$`;
-// Version parsing pattern: 1.2.3-alpha+build
-Patterns.VERSION_REGEX = `^${Patterns.CORE_VERSION}${Patterns.PRE_RELEASE}?${Patterns.BUILD}?$`;
-// Prefixed version parsing pattern: v1.2-alpha+build
-Patterns.LOOSE_VERSION_REGEX = `^v?${Patterns.LOOSE_CORE_VERSION}${Patterns.PRE_RELEASE}?${Patterns.BUILD}?$`;
-// Operator condition: >=1.2.*
-Patterns.OPERATOR_CONDITION_REGEX = `(${Patterns.ALLOWED_OPERATORS})\\s*v?(?:${Patterns.X_RANGE_VERSION})`;
-// Hyphen range condition: 1.2.* - 2.0.0
-Patterns.HYPHEN_CONDITION_REGEX = `\\s*v?(?:${Patterns.X_RANGE_VERSION})\\s+-\\s+v?(?:${Patterns.X_RANGE_VERSION})\\s*`;
-exports.Patterns = Patterns;
 
 
 /***/ }),
@@ -310,6 +248,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Properties = void 0;
 const fs = __importStar(__nccwpck_require__(147));
+const core = __importStar(__nccwpck_require__(186));
 class Properties {
     constructor(filePath) {
         this.properties = {};
@@ -322,6 +261,7 @@ class Properties {
         for (const line of lines) {
             if (line.trim() !== '' && !line.startsWith('#')) {
                 const [key, value] = line.split('=');
+                core.debug('${key} -> ${value}');
                 this.properties[key.trim()] = value.trim();
             }
         }
@@ -351,6 +291,29 @@ exports.Properties = Properties;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -359,9 +322,15 @@ exports.SemanticVersion = void 0;
 const properties_1 = __nccwpck_require__(333);
 const fs_1 = __importDefault(__nccwpck_require__(147));
 const version_1 = __nccwpck_require__(217);
-const VersionInfo_1 = __nccwpck_require__(414);
+const version_info_1 = __nccwpck_require__(711);
+const core = __importStar(__nccwpck_require__(186));
 class SemanticVersion {
-    update(updateType, version_name, version_code, filePath) {
+    constructor(version_name_key, version_code_key) {
+        this.version_code_key = version_code_key !== null && version_code_key !== void 0 ? version_code_key : 'version_code';
+        this.version_name_key = version_name_key !== null && version_name_key !== void 0 ? version_name_key : 'version_name';
+    }
+    update(updateType, version_name, version_name_postfix, version_code, filePath) {
+        core.debug('update()  type:${updateType} name:${version_name}  code:${version_code}  file:${filePath}');
         let old_name = version_name ? version_name : '';
         let old_code = isNaN(version_code !== null && version_code !== void 0 ? version_code : NaN)
             ? -1
@@ -369,8 +338,10 @@ class SemanticVersion {
         // check if file exists if exists then read it and parse version and version code
         if (filePath !== undefined && this.fileExists(filePath)) {
             const properties = new properties_1.Properties(filePath);
-            const name = properties.getValue('version');
-            const code = properties.getValue('code');
+            const name = properties.getValue(this.version_name_key);
+            const code = properties.getValue(this.version_code_key);
+            core.debug('name  ${name}');
+            core.debug('code  ${code}');
             if (!code || !this.isNumber(code)) {
                 throw new Error('invalid version code');
             }
@@ -381,6 +352,8 @@ class SemanticVersion {
             old_name = name;
         }
         else {
+            core.debug('old_name  ${old_name}');
+            core.debug('old_code  ${old_code}');
             //else  read version and version code
             if (isNaN(old_code)) {
                 throw new Error('invalid version code');
@@ -390,16 +363,16 @@ class SemanticVersion {
             }
         }
         // generate new version and version code
-        const versionInfo = this.generateVersion(updateType, old_name, old_code);
+        const versionInfo = this.generateVersion(updateType, old_name, old_code, version_name_postfix);
         if (filePath != null && this.fileExists(filePath)) {
             const properties = new properties_1.Properties(filePath);
-            properties.setValue('version', versionInfo.version_name);
-            properties.setValue('code', versionInfo.version_code.toString());
+            properties.setValue(this.version_name_key, versionInfo.version_name);
+            properties.setValue(this.version_code_key, versionInfo.version_code.toString());
             properties.saveToFile();
         }
         return versionInfo;
     }
-    generateVersion(update_type, name, code) {
+    generateVersion(update_type, name, code, postfix) {
         const old_version = version_1.Version.parse(name);
         let new_version;
         let new_code = code;
@@ -414,13 +387,13 @@ class SemanticVersion {
             new_version = old_version.nextPatch();
         }
         else if (update_type === 'build') {
-            // const preRelease = format(new Date(), 'ddMMMHHmm').toUpperCase();
-            new_version = old_version.copy(old_version.major, old_version.minor, old_version.patch, `${new_code}`);
+            const preRelease = postfix ? `${postfix}${new_code}` : new_code.toString();
+            new_version = old_version.copy(old_version.major, old_version.minor, old_version.patch, preRelease);
         }
         else {
             throw new Error('invalid update type');
         }
-        return new VersionInfo_1.VersionInfo(new_version.toString(), new_code);
+        return new version_info_1.VersionInfo(new_version.toString(), new_code);
     }
     fileExists(filePath) {
         return fs_1.default.existsSync(filePath);
@@ -473,6 +446,11 @@ class Validator {
             throw Error('version_code is required if file_path is not provided');
         }
     }
+    checkFilePath() {
+        if (this.file_path !== '' && !this.fileExists(this.file_path)) {
+            throw Error(`file_path ${this.file_path} does not exist`);
+        }
+    }
     fileExists(filePath) {
         return fs_1.default.existsSync(filePath);
     }
@@ -486,6 +464,24 @@ exports.Validator = Validator;
 
 /***/ }),
 
+/***/ 711:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionInfo = void 0;
+class VersionInfo {
+    constructor(version_name, version_code) {
+        this.version_name = version_name;
+        this.version_code = version_code;
+    }
+}
+exports.VersionInfo = VersionInfo;
+
+
+/***/ }),
+
 /***/ 217:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -494,8 +490,37 @@ exports.Validator = Validator;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Version = void 0;
 const pre_release_1 = __nccwpck_require__(197);
-const patterns_1 = __nccwpck_require__(996);
 const inc_1 = __nccwpck_require__(789);
+const NUMERIC = '0|[1-9]\\d*';
+// Alphanumeric or hyphen pattern.
+const ALPHANUMERIC_OR_HYPHEN = '[0-9a-zA-Z-]';
+// Letter or hyphen pattern.
+const LETTER_OR_HYPHEN = '[a-zA-Z-]';
+// Non-numeric identifier pattern. (used for parsing pre-release)
+const NON_NUMERIC = `\\d*${LETTER_OR_HYPHEN}${ALPHANUMERIC_OR_HYPHEN}*`;
+// Dot-separated numeric identifier pattern. (<major>.<minor>.<patch>)
+const CORE_VERSION = `(${NUMERIC})\\.(${NUMERIC})\\.(${NUMERIC})`;
+// Dot-separated loose numeric identifier pattern. (<major>(.<minor>)?(.<patch>)?)
+const LOOSE_CORE_VERSION = `(${NUMERIC})(?:\\.(${NUMERIC}))?(?:\\.(${NUMERIC}))?`;
+// Numeric or non-numeric pre-release part pattern.
+const PRE_RELEASE_PART = `(?:${NUMERIC}|${NON_NUMERIC})`;
+// Pre-release identifier pattern. A hyphen followed by dot-separated
+// numeric or non-numeric pre-release parts.
+const PRE_RELEASE = `(?:-(${PRE_RELEASE_PART}(?:\\.${PRE_RELEASE_PART})*))`;
+// Build-metadata identifier pattern. A + sign followed by dot-separated
+// alphanumeric build-metadata parts.
+const BUILD = `(?:\\+(${ALPHANUMERIC_OR_HYPHEN}+(?:\\.${ALPHANUMERIC_OR_HYPHEN}+)*))`;
+// List of allowed operations in a condition.
+// Numeric identifier pattern for parsing conditions.
+// X-RANGE version: 1.x | 1.2.* | 1.1.X
+// Pattern that only matches numbers.
+// Pattern that only matches alphanumeric or hyphen characters.
+// Version parsing pattern: 1.2.3-alpha+build
+const VERSION_REGEX = `^${CORE_VERSION}${PRE_RELEASE}?${BUILD}?$`;
+// Prefixed version parsing pattern: v1.2-alpha+build
+const LOOSE_VERSION_REGEX = `^v?${LOOSE_CORE_VERSION}${PRE_RELEASE}?${BUILD}?$`;
+// Operator condition: >=1.2.*
+// Hyphen range condition: 1.2.* - 2.0.0
 class Version {
     constructor(major = 0, minor = 0, patch = 0, parsedPreRelease, buildMetadata) {
         this.major = major;
@@ -616,8 +641,8 @@ class Version {
         return Version.create(major, minor, patch, preRelease, buildMetadata);
     }
 }
-Version.versionRegex = new RegExp(patterns_1.Patterns.VERSION_REGEX);
-Version.looseVersionRegex = new RegExp(patterns_1.Patterns.LOOSE_VERSION_REGEX);
+Version.versionRegex = new RegExp(VERSION_REGEX);
+Version.looseVersionRegex = new RegExp(LOOSE_VERSION_REGEX);
 Version.min = new Version();
 exports.Version = Version;
 
