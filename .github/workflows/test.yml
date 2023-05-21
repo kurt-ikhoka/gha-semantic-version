@@ -7,15 +7,7 @@ on: # rebuild any PRs and main branch changes
       - 'releases/*'
 
 jobs:
-#  build: # make sure build/ci work properly
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - run: |
-#          npm install
-#      - run: |
-#          npm run all
-  test: # make sure the action works on a clean machine without building
+  build: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,6 +15,14 @@ jobs:
           npm install
       - run: |
           npm run all
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+#      - run: |
+#          npm install
+#      - run: |
+#          npm run all
       - name: 'PATCH version update'
         uses: ./
         id: patch
@@ -37,42 +37,42 @@ jobs:
           echo "Version name: ${{ steps.patch.outputs.new-version-name }}"
           echo "Version code: ${{ steps.patch.outputs.new-version-code }}"
 
-#      - name: 'MINOR version update'
-#        uses: ./
-#        id: minor
-#        with:
-#          version-name: '1.0.0'
-#          version-code:  0
-#          update-type: 'minor'
-#      - name: 'Get Minored version'
-#        run: |
-#          echo "Minored 1.0.0"
-#          echo "Version name: ${{ steps.minor.outputs.new-version-name }}"
-#          echo "Version code: ${{ steps.minor.outputs.new-version-code }}"
-#
-#      - name: 'MAJOR version update'
-#        uses: ./
-#        id: major
-#        with:
-#          version-name: '1.0.0'
-#          version-code:  0
-#          update-type: 'major'
-#      - name: 'Get Majored version'
-#        run: |
-#          echo "Majored 1.0.0"
-#          echo "Version name: ${{ steps.major.outputs.new-version-name }}"
-#          echo "Version code: ${{ steps.major.outputs.new-version-code }}"
-#
-#      - name: 'BUILD version update'
-#        uses: ./
-#        id: build
-#        with:
-#          version-name: '1.0.0'
-#          version-code:  0
-#          version-name-postfix: 'alpha'
-#          update-type: 'build'
-#      - name: 'Get Builded version'
-#        run: |
-#          echo "built 1.0.0"
-#          echo "Version name: ${{ steps.build.outputs.new-version-name }}"
-#          echo "Version code: ${{ steps.build.outputs.new-version-code }}"
+      - name: 'MINOR version update'
+        uses: ./
+        id: minor
+        with:
+          version-name: '1.0.0'
+          version-code:  0
+          update-type: 'minor'
+      - name: 'Get Minored version'
+        run: |
+          echo "Minored 1.0.0"
+          echo "Version name: ${{ steps.minor.outputs.new-version-name }}"
+          echo "Version code: ${{ steps.minor.outputs.new-version-code }}"
+
+      - name: 'MAJOR version update'
+        uses: ./
+        id: major
+        with:
+          version-name: '1.0.0'
+          version-code:  0
+          update-type: 'major'
+      - name: 'Get Majored version'
+        run: |
+          echo "Majored 1.0.0"
+          echo "Version name: ${{ steps.major.outputs.new-version-name }}"
+          echo "Version code: ${{ steps.major.outputs.new-version-code }}"
+
+      - name: 'BUILD version update'
+        uses: ./
+        id: build
+        with:
+          version-name: '1.0.0'
+          version-code:  0
+          version-name-postfix: 'alpha'
+          update-type: 'build'
+      - name: 'Get Builded version'
+        run: |
+          echo "built 1.0.0"
+          echo "Version name: ${{ steps.build.outputs.new-version-name }}"
+          echo "Version code: ${{ steps.build.outputs.new-version-code }}"
