@@ -28,7 +28,7 @@ jobs:
           version-code-key: 'bundle.version'
           version-name-key: 'bundle.version.code'
           version-code:  0
-          update-type: 'patch'
+          update-type: 'build'
       - name: 'Get Patched version'
         run: |
           echo "Patched 1.0.0"
