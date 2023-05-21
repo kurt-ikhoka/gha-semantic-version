@@ -28,6 +28,8 @@ export class SemanticVersion {
       const properties = new Properties(filePath)
       const name = properties.getValue(this.version_name_key)
       const code = properties.getValue(this.version_code_key)
+      console.log('name', name)
+      console.log('code', code)
       if (!code || !this.isNumber(code)) {
         throw new Error('invalid version code')
       }
