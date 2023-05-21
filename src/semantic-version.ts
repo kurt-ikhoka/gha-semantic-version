@@ -44,6 +44,8 @@ export class SemanticVersion {
       old_code = parseInt(code)
       old_name = name
     } else {
+      core.debug('old_name  ${old_name}')
+      core.debug('old_code  ${old_code}')
       //else  read version and version code
       if (isNaN(old_code)) {
         throw new Error('invalid version code')
