@@ -21,8 +21,6 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
           npm install
-      - run: |
-          npm run all
       - name: 'PATCH version update'
         uses: ./
         id: patch
