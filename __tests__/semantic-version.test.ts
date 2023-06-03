@@ -59,6 +59,12 @@ describe('version updates without properties file', () => {
         expect(new_version.version_name).toEqual("2.0.0");
         expect(new_version.version_code).toEqual(401);
     })
+
+    it('can update a release as a build', async () => {
+        const new_version = version.update('build', '1.0.0', "beta.",400, undefined);
+        expect(new_version.version_name).toEqual("1.0.0-beta.401");
+        expect(new_version.version_code).toEqual(401);
+    })
 })
 
 describe('version updates with properties file', () => {
