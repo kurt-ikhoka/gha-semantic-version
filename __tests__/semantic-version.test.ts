@@ -41,6 +41,24 @@ describe('version updates without properties file', () => {
         expect(new_version.version_name).toEqual("1.0.0-beta401");
         expect(new_version.version_code).toEqual(401);
     })
+
+    it('can update a pre-release to a patch release', async () => {
+        const new_version = version.update('patch', '1.0.0-beta.400', "beta",400, undefined);
+        expect(new_version.version_name).toEqual("1.0.0");
+        expect(new_version.version_code).toEqual(401);
+    })
+
+    it('can update a pre-release to a minor release', async () => {
+        const new_version = version.update('minor', '1.0.0-beta.400', "beta",400, undefined);
+        expect(new_version.version_name).toEqual("1.1.0");
+        expect(new_version.version_code).toEqual(401);
+    })
+
+    it('can update a pre-release to a major release', async () => {
+        const new_version = version.update('major', '1.0.0-beta.400', "beta",400, undefined);
+        expect(new_version.version_name).toEqual("2.0.0");
+        expect(new_version.version_code).toEqual(401);
+    })
 })
 
 describe('version updates with properties file', () => {
